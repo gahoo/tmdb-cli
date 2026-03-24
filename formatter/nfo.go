@@ -2,6 +2,7 @@ package formatter
 
 import (
 	"encoding/xml"
+	"io"
 	"fmt"
 
 	"github.com/gahoolee/tmdb-cli/api"
@@ -51,7 +52,33 @@ type SeasonNFO struct {
 	Premiered    string   `xml:"premiered"`
 }
 
-func printNFO(data interface{}, itemType string) error {
+type EpisodeNFO struct {
+	XMLName  xml.Name `xml:"episodedetails"`
+	Title    string   `xml:"title"`
+	Season   int      `xml:"season"`
+	Episode  int      `xml:"episode"`
+	Plot     string   `xml:"plot"`
+	Rating   float64  `xml:"rating"`
+	Aired    string   `xml:"aired"`
+	Thumb    string   `xml:"thumb,omitempty"`
+	Runtime  int      `xml:"runtime"`
+	UniqueID UniqueID `xml:"uniqueid"`
+}
+
+type CollectionNFO struct {
+	XMLName xml.Name `xml:"set"`
+	Title   string   `xml:"title"`
+	Plot    string   `xml:"plot"`
+	Thumb   string   `xml:"thumb,omitempty"`
+}
+
+type FindResultsNFO struct {
+	XMLName xml.Name `xml:"results"`
+	Movies  int      `xml:"movies,attr"`
+	TV      int      `xml:"tvshows,attr"`
+}
+
+func printNFO(w io.Writer, data interface{}, itemType string) error {
 	var output interface{}
 
 	switch v := data.(type) {
@@ -110,8 +137,40 @@ func printNFO(data interface{}, itemType string) error {
 			Thumb:        thumb,
 			Premiered:    v.AirDate,
 		}
+	case *api.TVEpisode:
+		thumb := ""
+		if v.StillPath != "" {
+			thumb = fmt.Sprintf("https://image.tmdb.org/t/p/w500%s", v.StillPath)
+		}
+		output = &EpisodeNFO{
+			Title:    v.Name,
+			Season:   v.SeasonNumber,
+			Episode:  v.EpisodeNumber,
+			Plot:     v.Overview,
+			Rating:   v.VoteAverage,
+			Aired:    v.AirDate,
+			Thumb:    thumb,
+			Runtime:  v.Runtime,
+			UniqueID: UniqueID{Type: "tmdb", Default: true, Value: v.ID},
+		}
+	case *api.Collection:
+		thumb := ""
+		if v.PosterPath != "" {
+			thumb = fmt.Sprintf("https://image.tmdb.org/t/p/w500%s", v.PosterPath)
+		}
+		output = &CollectionNFO{
+			Title: v.Name,
+			Plot:  v.Overview,
+			Thumb: thumb,
+		}
+	case *api.FindResults:
+		fmt.Fprintln(w, "<!-- Warning: Searching outputs NFO as a generic XML XML. For standard media metadata, fetch specific movie/tv details. -->")
+		output = &FindResultsNFO{
+			Movies: len(v.MovieResults),
+			TV:     len(v.TVResults),
+		}
 	case *api.SearchResultPage:
-	    fmt.Println("Warning: Searching outputs NFO as a raw XML. For standard media metadata, fetch specific movie/tv details.")
+	    fmt.Fprintln(w, "<!-- Warning: Searching outputs NFO as a raw XML. For standard media metadata, fetch specific movie/tv details. -->")
 		// Fallback to basic struct dump
 		output = v
 	default:
@@ -122,6 +181,6 @@ func printNFO(data interface{}, itemType string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Printf("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n%s\n", string(out))
+	fmt.Fprintf(w, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n%s\n", string(out))
 	return nil
 }

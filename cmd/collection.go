@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/gahoolee/tmdb-cli/api"
@@ -36,15 +34,9 @@ var collectionCmd = &cobra.Command{
 			return
 		}
 
-		err = formatter.OutputResult(result, outputFormat, "collection")
+		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "collection")
 		if err != nil {
 			fmt.Println("Formatting error:", err)
-		}
-
-		if outputFile != "" {
-			data, _ := json.MarshalIndent(result, "", "  ")
-			_ = os.WriteFile(outputFile, data, 0644)
-			fmt.Printf("Results exported to %s\n", outputFile)
 		}
 
 		if outputFormat == "nfo" && downloadPoster {

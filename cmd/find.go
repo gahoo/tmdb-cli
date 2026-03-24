@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 
 	"github.com/gahoolee/tmdb-cli/api"
 	"github.com/gahoolee/tmdb-cli/formatter"
@@ -37,15 +35,9 @@ var findCmd = &cobra.Command{
 			return
 		}
 
-		err = formatter.OutputResult(result, outputFormat, "find")
+		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "find")
 		if err != nil {
 			fmt.Println("Formatting error:", err)
-		}
-
-		if outputFile != "" {
-			data, _ := json.MarshalIndent(result, "", "  ")
-			_ = os.WriteFile(outputFile, data, 0644)
-			fmt.Printf("Results exported to %s\n", outputFile)
 		}
 	},
 }

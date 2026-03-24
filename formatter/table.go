@@ -3,15 +3,15 @@ package formatter
 import (
 	"encoding/json"
 	"fmt"
-	"os"
+	"io"
 	"strings"
 	"text/tabwriter"
 
 	"github.com/gahoolee/tmdb-cli/api"
 )
 
-func printTable(data interface{}, itemType string) error {
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 3, ' ', tabwriter.TabIndent)
+func printTable(out io.Writer, data interface{}, itemType string) error {
+	w := tabwriter.NewWriter(out, 0, 0, 3, ' ', tabwriter.TabIndent)
 
 	switch v := data.(type) {
 	case *api.SearchResultPage:
@@ -79,6 +79,42 @@ func printTable(data interface{}, itemType string) error {
 			genres = append(genres, g.Name)
 		}
 		fmt.Fprintf(w, "Genres\t%s\n", strings.Join(genres, ", "))
+
+	case *api.TVEpisode:
+		fmt.Fprintln(w, "KEY\tVALUE")
+		fmt.Fprintln(w, "---\t-----")
+		fmt.Fprintf(w, "ID\t%d\n", v.ID)
+		fmt.Fprintf(w, "Name\t%s\n", v.Name)
+		fmt.Fprintf(w, "Season\t%d\n", v.SeasonNumber)
+		fmt.Fprintf(w, "Episode\t%d\n", v.EpisodeNumber)
+		fmt.Fprintf(w, "Air Date\t%s\n", extractYear(v.AirDate))
+		fmt.Fprintf(w, "Rating\t%.1f\n", v.VoteAverage)
+
+	case *api.Collection:
+		fmt.Fprintln(w, "KEY\tVALUE")
+		fmt.Fprintln(w, "---\t-----")
+		fmt.Fprintf(w, "ID\t%d\n", v.ID)
+		fmt.Fprintf(w, "Name\t%s\n", v.Name)
+		fmt.Fprintf(w, "Parts\t%d movies\n", len(v.Parts))
+
+	case *api.FindResults:
+		fmt.Fprintln(w, "ID\tTYPE\tTITLE/NAME\tDATE")
+		fmt.Fprintln(w, "--\t----\t----------\t----")
+		for _, m := range v.MovieResults {
+			fmt.Fprintf(w, "%d\tMovie\t%s\t%s\n", m.ID, m.Title, extractYear(m.ReleaseDate))
+		}
+		for _, t := range v.TVResults {
+			fmt.Fprintf(w, "%d\tTV\t%s\t%s\n", t.ID, t.Name, extractYear(t.FirstAirDate))
+		}
+		for _, p := range v.PersonResults {
+			fmt.Fprintf(w, "%d\tPerson\t%s\t-\n", p.ID, p.Name)
+		}
+		for _, e := range v.TVEpisodeResults {
+			fmt.Fprintf(w, "%d\tEpisode\t%s\tS%02dE%02d\n", e.ID, e.Name, e.SeasonNumber, e.EpisodeNumber)
+		}
+		for _, s := range v.TVSeasonResults {
+			fmt.Fprintf(w, "%d\tSeason\t%s\t-\n", s.ID, s.Name)
+		}
 
 	default:
 		fmt.Fprintln(w, "Unsupported table view for this data type.")

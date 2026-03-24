@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"os"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -39,15 +37,10 @@ var tvCmd = &cobra.Command{
 				fmt.Println("Error fetching TV season:", err)
 				return
 			}
-			err = formatter.OutputResult(result, outputFormat, "season")
+
+			err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "season")
 			if err != nil {
 				fmt.Println("Formatting error:", err)
-			}
-
-			if outputFile != "" {
-				data, _ := json.MarshalIndent(result, "", "  ")
-				_ = os.WriteFile(outputFile, data, 0644)
-				fmt.Printf("Results exported to %s\n", outputFile)
 			}
 
 			if outputFormat == "nfo" && downloadPoster {
@@ -65,15 +58,10 @@ var tvCmd = &cobra.Command{
 				fmt.Println("Error fetching TV series:", err)
 				return
 			}
-			err = formatter.OutputResult(result, outputFormat, "tvshow")
+
+			err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "tvshow")
 			if err != nil {
 				fmt.Println("Formatting error:", err)
-			}
-
-			if outputFile != "" {
-				data, _ := json.MarshalIndent(result, "", "  ")
-				_ = os.WriteFile(outputFile, data, 0644)
-				fmt.Printf("Results exported to %s\n", outputFile)
 			}
 
 			if outputFormat == "nfo" && downloadPoster {
@@ -110,15 +98,9 @@ var episodeCmd = &cobra.Command{
 			return
 		}
 
-		err = formatter.OutputResult(result, outputFormat, "episode")
+		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "episode")
 		if err != nil {
 			fmt.Println("Formatting error:", err)
-		}
-
-		if outputFile != "" {
-			data, _ := json.MarshalIndent(result, "", "  ")
-			_ = os.WriteFile(outputFile, data, 0644)
-			fmt.Printf("Results exported to %s\n", outputFile)
 		}
 
 		if outputFormat == "nfo" && downloadPoster {
