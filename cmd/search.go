@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,6 +35,12 @@ var searchCmd = &cobra.Command{
 		err = formatter.OutputResult(results, outputFormat, searchType)
 		if err != nil {
 			fmt.Println("Formatting error:", err)
+		}
+
+		if outputFile != "" {
+			data, _ := json.MarshalIndent(results, "", "  ")
+			_ = os.WriteFile(outputFile, data, 0644)
+			fmt.Printf("Results exported to %s\n", outputFile)
 		}
 	},
 }

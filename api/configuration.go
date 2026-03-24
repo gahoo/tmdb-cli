@@ -6,10 +6,9 @@ import (
 	"io"
 )
 
-// GetMovieDetails retrieves the movie details by ID
-func (c *Client) GetMovieDetails(movieID int) (*MovieDetails, error) {
-	endpoint := fmt.Sprintf("/movie/%d?language=en-US&append_to_response=credits,alternative_titles,external_ids", movieID)
-	req, err := c.newRequest("GET", endpoint)
+// GetConfiguration retrieves the system wide configuration information for TMDB API
+func (c *Client) GetConfiguration() (*Configuration, error) {
+	req, err := c.newRequest("GET", "/configuration")
 	if err != nil {
 		return nil, err
 	}
@@ -25,7 +24,7 @@ func (c *Client) GetMovieDetails(movieID int) (*MovieDetails, error) {
 		return nil, fmt.Errorf("API error: status code %d, body: %s", res.StatusCode, string(body))
 	}
 
-	var result MovieDetails
+	var result Configuration
 	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
 		return nil, err
 	}

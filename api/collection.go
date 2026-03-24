@@ -6,9 +6,9 @@ import (
 	"io"
 )
 
-// GetMovieDetails retrieves the movie details by ID
-func (c *Client) GetMovieDetails(movieID int) (*MovieDetails, error) {
-	endpoint := fmt.Sprintf("/movie/%d?language=en-US&append_to_response=credits,alternative_titles,external_ids", movieID)
+// GetCollection retrieves collection details by ID
+func (c *Client) GetCollection(collectionID int) (*Collection, error) {
+	endpoint := fmt.Sprintf("/collection/%d?language=en-US", collectionID)
 	req, err := c.newRequest("GET", endpoint)
 	if err != nil {
 		return nil, err
@@ -25,7 +25,7 @@ func (c *Client) GetMovieDetails(movieID int) (*MovieDetails, error) {
 		return nil, fmt.Errorf("API error: status code %d, body: %s", res.StatusCode, string(body))
 	}
 
-	var result MovieDetails
+	var result Collection
 	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
 		return nil, err
 	}

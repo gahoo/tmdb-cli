@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 
 	"github.com/spf13/cobra"
@@ -41,9 +43,16 @@ var tvCmd = &cobra.Command{
 			if err != nil {
 				fmt.Println("Formatting error:", err)
 			}
+
+			if outputFile != "" {
+				data, _ := json.MarshalIndent(result, "", "  ")
+				_ = os.WriteFile(outputFile, data, 0644)
+				fmt.Printf("Results exported to %s\n", outputFile)
+			}
+
 			if outputFormat == "nfo" && downloadPoster {
 				destPath := fmt.Sprintf("season%02d-poster.jpg", result.SeasonNumber)
-				err = api.DownloadImage(result.PosterPath, destPath)
+				err = client.DownloadImage(result.PosterPath, destPath)
 				if err != nil {
 					fmt.Println("Warning: Failed to download poster:", err)
 				} else {
@@ -60,8 +69,15 @@ var tvCmd = &cobra.Command{
 			if err != nil {
 				fmt.Println("Formatting error:", err)
 			}
+
+			if outputFile != "" {
+				data, _ := json.MarshalIndent(result, "", "  ")
+				_ = os.WriteFile(outputFile, data, 0644)
+				fmt.Printf("Results exported to %s\n", outputFile)
+			}
+
 			if outputFormat == "nfo" && downloadPoster {
-				err = api.DownloadImage(result.PosterPath, "poster.jpg")
+				err = client.DownloadImage(result.PosterPath, "poster.jpg")
 				if err != nil {
 					fmt.Println("Warning: Failed to download poster:", err)
 				} else {
@@ -72,7 +88,52 @@ var tvCmd = &cobra.Command{
 	},
 }
 
+var episodeCmd = &cobra.Command{
+	Use:   "episode [tvID] [seasonNum] [episodeNum]",
+	Short: "Get details for a TV episode",
+	Args:  cobra.ExactArgs(3),
+	Run: func(cmd *cobra.Command, args []string) {
+		tvID, _ := strconv.Atoi(args[0])
+		seasonNum, _ := strconv.Atoi(args[1])
+		epNum, _ := strconv.Atoi(args[2])
+
+		token := viper.GetString("token")
+		if token == "" {
+			fmt.Println("Error: API Token is not set. Use 'tmdb config set-auth <TOKEN>'")
+			return
+		}
+
+		client := api.NewClient(token)
+		result, err := client.GetTVEpisode(tvID, seasonNum, epNum)
+		if err != nil {
+			fmt.Println("Error fetching TV episode:", err)
+			return
+		}
+
+		err = formatter.OutputResult(result, outputFormat, "episode")
+		if err != nil {
+			fmt.Println("Formatting error:", err)
+		}
+
+		if outputFile != "" {
+			data, _ := json.MarshalIndent(result, "", "  ")
+			_ = os.WriteFile(outputFile, data, 0644)
+			fmt.Printf("Results exported to %s\n", outputFile)
+		}
+
+		if outputFormat == "nfo" && downloadPoster {
+			err = client.DownloadImage(result.StillPath, "thumb.jpg")
+			if err != nil {
+				fmt.Println("Warning: Failed to download thumbnail:", err)
+			} else {
+				fmt.Println("Thumbnail downloaded to thumb.jpg")
+			}
+		}
+	},
+}
+
 func init() {
 	tvCmd.Flags().IntVarP(&seasonNum, "season", "s", 0, "Fetch specific season details by season number")
+	tvCmd.AddCommand(episodeCmd)
 	rootCmd.AddCommand(tvCmd)
 }

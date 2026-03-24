@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net/url"
 )
 
-// GetMovieDetails retrieves the movie details by ID
-func (c *Client) GetMovieDetails(movieID int) (*MovieDetails, error) {
-	endpoint := fmt.Sprintf("/movie/%d?language=en-US&append_to_response=credits,alternative_titles,external_ids", movieID)
+// FindByExternalID looks up TV, Movie, etc. by external ID (e.g., imdb_id, tvdb_id)
+func (c *Client) FindByExternalID(externalID string, externalSource string) (*FindResults, error) {
+	endpoint := fmt.Sprintf("/find/%s?external_source=%s&language=en-US", url.PathEscape(externalID), externalSource)
 	req, err := c.newRequest("GET", endpoint)
 	if err != nil {
 		return nil, err
@@ -25,7 +26,7 @@ func (c *Client) GetMovieDetails(movieID int) (*MovieDetails, error) {
 		return nil, fmt.Errorf("API error: status code %d, body: %s", res.StatusCode, string(body))
 	}
 
-	var result MovieDetails
+	var result FindResults
 	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
 		return nil, err
 	}

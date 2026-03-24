@@ -1,7 +1,9 @@
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -32,6 +34,12 @@ var trendingCmd = &cobra.Command{
 		err = formatter.OutputResult(result, outputFormat, "trending")
 		if err != nil {
 			fmt.Println("Formatting error:", err)
+		}
+
+		if outputFile != "" {
+			data, _ := json.MarshalIndent(result, "", "  ")
+			_ = os.WriteFile(outputFile, data, 0644)
+			fmt.Printf("Results exported to %s\n", outputFile)
 		}
 	},
 }

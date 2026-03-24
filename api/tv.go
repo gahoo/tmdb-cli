@@ -8,7 +8,7 @@ import (
 
 // GetTVDetails retrieves the tv show details by ID
 func (c *Client) GetTVDetails(tvID int) (*TVDetails, error) {
-	endpoint := fmt.Sprintf("/tv/%d?language=en-US", tvID)
+	endpoint := fmt.Sprintf("/tv/%d?language=en-US&append_to_response=credits,alternative_titles,external_ids", tvID)
 	req, err := c.newRequest("GET", endpoint)
 	if err != nil {
 		return nil, err
@@ -53,6 +53,33 @@ func (c *Client) GetTVSeasonDetails(tvID int, seasonNumber int) (*TVSeason, erro
 	}
 
 	var result TVSeason
+	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+// GetTVEpisode retrieves the tv episode details by tv ID, season number, and episode number
+func (c *Client) GetTVEpisode(tvID int, seasonNumber int, episodeNumber int) (*TVEpisode, error) {
+	endpoint := fmt.Sprintf("/tv/%d/season/%d/episode/%d?language=en-US", tvID, seasonNumber, episodeNumber)
+	req, err := c.newRequest("GET", endpoint)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.HTTPClient.Do(req)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != 200 {
+		body, _ := io.ReadAll(res.Body)
+		return nil, fmt.Errorf("API error: status code %d, body: %s", res.StatusCode, string(body))
+	}
+
+	var result TVEpisode
 	if err := json.NewDecoder(res.Body).Decode(&result); err != nil {
 		return nil, err
 	}

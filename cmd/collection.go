@@ -6,20 +6,20 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 	"github.com/gahoolee/tmdb-cli/api"
 	"github.com/gahoolee/tmdb-cli/formatter"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
-var movieCmd = &cobra.Command{
-	Use:   "movie [ID]",
-	Short: "Get details for a movie by its TMDB ID",
+var collectionCmd = &cobra.Command{
+	Use:   "collection [ID]",
+	Short: "Get details for a collection by its TMDB ID",
 	Args:  cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		id, err := strconv.Atoi(args[0])
 		if err != nil {
-			fmt.Println("Invalid movie ID. It must be a number.")
+			fmt.Println("Invalid collection ID. It must be a number.")
 			return
 		}
 
@@ -30,13 +30,13 @@ var movieCmd = &cobra.Command{
 		}
 
 		client := api.NewClient(token)
-		result, err := client.GetMovieDetails(id)
+		result, err := client.GetCollection(id)
 		if err != nil {
-			fmt.Println("Error fetching movie:", err)
+			fmt.Println("Error fetching collection:", err)
 			return
 		}
 
-		err = formatter.OutputResult(result, outputFormat, "movie")
+		err = formatter.OutputResult(result, outputFormat, "collection")
 		if err != nil {
 			fmt.Println("Formatting error:", err)
 		}
@@ -59,5 +59,5 @@ var movieCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(movieCmd)
+	rootCmd.AddCommand(collectionCmd)
 }

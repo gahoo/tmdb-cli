@@ -3,18 +3,27 @@ package api
 import (
 	"fmt"
 	"io"
-	"net/http"
 	"os"
 )
 
 // DownloadImage retrieves an image from TMDB and saves it to a local path
-func DownloadImage(posterPath string, destPath string) error {
+func (c *Client) DownloadImage(posterPath string, destPath string) error {
 	if posterPath == "" {
 		return nil // Nothing to download
 	}
 
-	url := fmt.Sprintf("https://image.tmdb.org/t/p/original%s", posterPath)
-	resp, err := http.Get(url)
+	config, err := c.GetConfiguration()
+	if err != nil {
+		return fmt.Errorf("failed to fetch API configuration: %v", err)
+	}
+
+	baseURL := config.Images.SecureBaseURL
+	if baseURL == "" {
+		baseURL = "https://image.tmdb.org/t/p/"
+	}
+
+	url := fmt.Sprintf("%soriginal%s", baseURL, posterPath)
+	resp, err := c.HTTPClient.Get(url)
 	if err != nil {
 		return fmt.Errorf("failed to download image: %v", err)
 	}

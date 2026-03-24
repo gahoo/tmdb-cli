@@ -8,8 +8,9 @@ import (
 )
 
 var (
-	outputFormat  string
+	outputFormat   string
 	downloadPoster bool
+	outputFile     string
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -33,6 +34,7 @@ func init() {
 	// Global flags
 	rootCmd.PersistentFlags().StringVar(&outputFormat, "format", "json", "Output format: json, markdown, nfo, table")
 	rootCmd.PersistentFlags().BoolVar(&downloadPoster, "poster", false, "Download the poster image locally when output format is NFO")
+	rootCmd.PersistentFlags().StringVarP(&outputFile, "output", "o", "", "Export JSON output to the specified file")
 }
 
 func initConfig() {
