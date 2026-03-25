@@ -188,24 +188,33 @@ func printMDNode(w io.Writer, node interface{}, depth int) {
 	case map[string]interface{}:
 		for key, val := range v {
 			if isComplex(val) {
-				fmt.Fprintf(w, "%s**%s**:\n", indent, key)
+				fmt.Fprintf(w, "%s- **%s**:\n", indent, key)
 				printMDNode(w, val, depth+1)
 			} else {
-				fmt.Fprintf(w, "%s**%s**: %v\n", indent, key, val)
+				fmt.Fprintf(w, "%s- **%s**: %v\n", indent, key, formatMDValue(val))
 			}
 		}
 	case []interface{}:
-		for idx, item := range v {
+		for _, item := range v {
 			if isComplex(item) {
-				fmt.Fprintf(w, "%s- Item %d:\n", indent, idx+1)
-				printMDNode(w, item, depth+1)
+				// No label, just the sub-node
+				printMDNode(w, item, depth)
 			} else {
-				fmt.Fprintf(w, "%s- %v\n", indent, item)
+				fmt.Fprintf(w, "%s- %v\n", indent, formatMDValue(item))
 			}
 		}
 	default:
-		fmt.Fprintf(w, "%s%v\n", indent, v)
+		fmt.Fprintf(w, "%s%v\n", indent, formatMDValue(v))
 	}
+}
+
+func formatMDValue(val interface{}) string {
+	if f, ok := val.(float64); ok {
+		if f == float64(int64(f)) {
+			return fmt.Sprintf("%.0f", f)
+		}
+	}
+	return fmt.Sprintf("%v", val)
 }
 
 func isComplex(node interface{}) bool {
