@@ -36,7 +36,7 @@ func TestOutputResultJSON(t *testing.T) {
 	data := map[string]string{"title": "Test Movie"}
 	
 	output, err := captureOutput(func() error {
-		return OutputResult(data, "json", "movie")
+		return OutputResult(os.Stdout, data, "json", "movie", "")
 	})
 
 	if err != nil {

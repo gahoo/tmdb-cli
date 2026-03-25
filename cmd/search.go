@@ -30,7 +30,7 @@ var searchCmd = &cobra.Command{
 			return
 		}
 
-		err = formatter.OutputResultToFileOrStdout(outputFile, results, outputFormat, searchType)
+		err = formatter.OutputResultToFileOrStdout(outputFile, results, outputFormat, searchType, outputFields)
 		if err != nil {
 			fmt.Println("Formatting error:", err)
 		}

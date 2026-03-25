@@ -34,7 +34,7 @@ var collectionCmd = &cobra.Command{
 			return
 		}
 
-		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "collection")
+		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "collection", outputFields)
 		if err != nil {
 			fmt.Println("Formatting error:", err)
 		}

@@ -8,7 +8,31 @@ import (
 )
 
 // OutputResult formats any data into JSON, Markdown, or NFO format
-func OutputResult(w io.Writer, data interface{}, format string, itemType string) error {
+func OutputResult(w io.Writer, data interface{}, format string, itemType string, fields string) error {
+	if fields != "" {
+		filteredData, err := FilterData(data, fields)
+		if err != nil {
+			return err
+		}
+		data = filteredData
+		
+		switch format {
+		case "json":
+			outJSON, err := json.MarshalIndent(data, "", "  ")
+			if err != nil {
+				return err
+			}
+			fmt.Fprintln(w, string(outJSON))
+			return nil
+		case "markdown":
+			return printDynamicMarkdown(w, data)
+		case "table":
+			return printDynamicTable(w, data)
+		case "nfo":
+			return printDynamicNFO(w, data)
+		}
+	}
+
 	switch format {
 	case "json":
 		return printJSON(w, data)
@@ -33,7 +57,7 @@ func printJSON(w io.Writer, data interface{}) error {
 }
 
 // OutputResultToFileOrStdout handles file creation if outputFile is set, then delegates to OutputResult
-func OutputResultToFileOrStdout(outputFile string, data interface{}, format string, itemType string) error {
+func OutputResultToFileOrStdout(outputFile string, data interface{}, format string, itemType string, fields string) error {
 	var out io.Writer = os.Stdout
 	var file *os.File
 
@@ -47,7 +71,7 @@ func OutputResultToFileOrStdout(outputFile string, data interface{}, format stri
 		out = file
 	}
 
-	err := OutputResult(out, data, format, itemType)
+	err := OutputResult(out, data, format, itemType, fields)
 	if err != nil {
 		return err
 	}

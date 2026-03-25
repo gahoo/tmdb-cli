@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"io"
 	"fmt"
+	"strings"
 
 	"github.com/gahoolee/tmdb-cli/api"
 )
@@ -183,4 +184,44 @@ func printNFO(w io.Writer, data interface{}, itemType string) error {
 	}
 	fmt.Fprintf(w, "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n%s\n", string(out))
 	return nil
+}
+
+func printDynamicNFO(w io.Writer, data interface{}) error {
+	fmt.Fprintln(w, `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>`)
+	fmt.Fprintln(w, "<metadata>")
+	printXMLNode(w, data, 1)
+	fmt.Fprintln(w, "</metadata>")
+	return nil
+}
+
+func printXMLNode(w io.Writer, node interface{}, depth int) {
+	indent := strings.Repeat("  ", depth)
+	switch v := node.(type) {
+	case map[string]interface{}:
+		for key, val := range v {
+			if isXMLComplex(val) {
+				fmt.Fprintf(w, "%s<%s>\n", indent, key)
+				printXMLNode(w, val, depth+1)
+				fmt.Fprintf(w, "%s</%s>\n", indent, key)
+			} else {
+				fmt.Fprintf(w, "%s<%s>%v</%s>\n", indent, key, val, key)
+			}
+		}
+	case []interface{}:
+		for _, item := range v {
+			fmt.Fprintf(w, "%s<item>\n", indent)
+			printXMLNode(w, item, depth+1)
+			fmt.Fprintf(w, "%s</item>\n", indent)
+		}
+	default:
+		fmt.Fprintf(w, "%s%v\n", indent, v)
+	}
+}
+
+func isXMLComplex(node interface{}) bool {
+	switch node.(type) {
+	case map[string]interface{}, []interface{}:
+		return true
+	}
+	return false
 }

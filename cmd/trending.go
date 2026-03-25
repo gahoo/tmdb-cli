@@ -29,7 +29,7 @@ var trendingCmd = &cobra.Command{
 			return
 		}
 
-		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "trending")
+		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "trending", outputFields)
 		if err != nil {
 			fmt.Println("Formatting error:", err)
 		}

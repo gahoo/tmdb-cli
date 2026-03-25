@@ -35,7 +35,7 @@ var findCmd = &cobra.Command{
 			return
 		}
 
-		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "find")
+		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "find", outputFields)
 		if err != nil {
 			fmt.Println("Formatting error:", err)
 		}

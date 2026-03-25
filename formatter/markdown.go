@@ -176,3 +176,42 @@ func printFindMarkdown(w io.Writer, data *api.FindResults) error {
 	}
 	return nil
 }
+
+func printDynamicMarkdown(w io.Writer, data interface{}) error {
+	printMDNode(w, data, 0)
+	return nil
+}
+
+func printMDNode(w io.Writer, node interface{}, depth int) {
+	indent := strings.Repeat("  ", depth)
+	switch v := node.(type) {
+	case map[string]interface{}:
+		for key, val := range v {
+			if isComplex(val) {
+				fmt.Fprintf(w, "%s**%s**:\n", indent, key)
+				printMDNode(w, val, depth+1)
+			} else {
+				fmt.Fprintf(w, "%s**%s**: %v\n", indent, key, val)
+			}
+		}
+	case []interface{}:
+		for idx, item := range v {
+			if isComplex(item) {
+				fmt.Fprintf(w, "%s- Item %d:\n", indent, idx+1)
+				printMDNode(w, item, depth+1)
+			} else {
+				fmt.Fprintf(w, "%s- %v\n", indent, item)
+			}
+		}
+	default:
+		fmt.Fprintf(w, "%s%v\n", indent, v)
+	}
+}
+
+func isComplex(node interface{}) bool {
+	switch node.(type) {
+	case map[string]interface{}, []interface{}:
+		return true
+	}
+	return false
+}

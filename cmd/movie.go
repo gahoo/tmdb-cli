@@ -34,7 +34,7 @@ var movieCmd = &cobra.Command{
 			return
 		}
 
-		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "movie")
+		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "movie", outputFields)
 		if err != nil {
 			fmt.Println("Formatting error:", err)
 		}

@@ -38,7 +38,7 @@ var tvCmd = &cobra.Command{
 				return
 			}
 
-			err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "season")
+			err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "season", outputFields)
 			if err != nil {
 				fmt.Println("Formatting error:", err)
 			}
@@ -59,7 +59,7 @@ var tvCmd = &cobra.Command{
 				return
 			}
 
-			err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "tvshow")
+			err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "tvshow", outputFields)
 			if err != nil {
 				fmt.Println("Formatting error:", err)
 			}
@@ -98,7 +98,7 @@ var episodeCmd = &cobra.Command{
 			return
 		}
 
-		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "episode")
+		err = formatter.OutputResultToFileOrStdout(outputFile, result, outputFormat, "episode", outputFields)
 		if err != nil {
 			fmt.Println("Formatting error:", err)
 		}

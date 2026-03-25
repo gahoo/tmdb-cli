@@ -123,3 +123,98 @@ func printTable(out io.Writer, data interface{}, itemType string) error {
 	w.Flush()
 	return nil
 }
+
+func printDynamicTable(w io.Writer, data interface{}) error {
+	tw := tabwriter.NewWriter(w, 0, 0, 3, ' ', tabwriter.TabIndent)
+
+	// Auto-unwrap "results" if it's the only key in a map
+	if mapData, ok := data.(map[string]interface{}); ok && len(mapData) == 1 {
+		if res, exists := mapData["results"]; exists {
+			data = res
+		}
+	}
+
+	switch v := data.(type) {
+	case []interface{}:
+		if len(v) == 0 {
+			return nil
+		}
+		// Try to extract all unique keys across all items to form headers
+		headerMap := make(map[string]bool)
+		for _, item := range v {
+			if itemMap, ok := item.(map[string]interface{}); ok {
+				for k := range itemMap {
+					headerMap[k] = true
+				}
+			}
+		}
+
+		if len(headerMap) == 0 {
+			for _, item := range v {
+				fmt.Fprintf(tw, "%v\n", item)
+			}
+		} else {
+			var headers []string
+			for k := range headerMap {
+				headers = append(headers, k)
+			}
+			fmt.Fprintln(tw, strings.Join(headers, "\t"))
+
+			var separator []string
+			for _, h := range headers {
+				separator = append(separator, strings.Repeat("-", len(h)))
+			}
+			fmt.Fprintln(tw, strings.Join(separator, "\t"))
+
+			for _, item := range v {
+				itemMap, ok := item.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				var row []string
+				for _, h := range headers {
+					val := itemMap[h]
+					valStr := formatValue(val)
+					if len(valStr) > 40 {
+						valStr = valStr[:37] + "..."
+					}
+					row = append(row, valStr)
+				}
+				fmt.Fprintln(tw, strings.Join(row, "\t"))
+			}
+		}
+	case map[string]interface{}:
+		fmt.Fprintln(tw, "KEY\tVALUE")
+		fmt.Fprintln(tw, "---\t-----")
+		for k, val := range v {
+			vStr := formatValue(val)
+			if len(vStr) > 80 {
+				vStr = vStr[:77] + "..."
+			}
+			fmt.Fprintf(tw, "%s\t%s\n", k, vStr)
+		}
+	default:
+		fmt.Fprintf(tw, "%v\n", v)
+	}
+	tw.Flush()
+	return nil
+}
+
+func formatValue(val interface{}) string {
+	if val == nil {
+		return "null"
+	}
+	switch v := val.(type) {
+	case float64:
+		// Check if it looks like an ID (integer)
+		if v == float64(int64(v)) {
+			return fmt.Sprintf("%.0f", v)
+		}
+		return fmt.Sprintf("%v", v)
+	case map[string]interface{}, []interface{}:
+		b, _ := json.Marshal(v)
+		return string(b)
+	default:
+		return fmt.Sprintf("%v", v)
+	}
+}
