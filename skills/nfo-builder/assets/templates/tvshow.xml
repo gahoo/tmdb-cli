@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<tvshow>
+    <title></title>
+    <originaltitle></originaltitle>
+    <plot></plot>
+    <userrating></userrating>
+    <mpaa></mpaa>
+    <uniqueid type="" default="true"></uniqueid>
+    <genre></genre>
+    <premiered></premiered>
+    <status></status>
+    <studio></studio>
+    <actor>
+        <name></name>
+        <role></role>
+        <order>0</order>
+    </actor>
+    <episodeguide>
+        {"tmdb": "", "imdb": "", "tvdb": ""}
+    </episodeguide>
+</tvshow>

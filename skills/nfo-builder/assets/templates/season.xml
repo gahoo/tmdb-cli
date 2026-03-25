@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<season>
+    <title></title>
+    <showtitle></showtitle>
+    <seasonnumber></seasonnumber>
+    <plot></plot>
+    <premiered></premiered>
+    <uniqueid type="tmdb" default="true"></uniqueid>
+</season>
