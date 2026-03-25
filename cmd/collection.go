@@ -27,7 +27,12 @@ var collectionCmd = &cobra.Command{
 			return
 		}
 
-		client := api.NewClient(token)
+		lang := outputLanguage
+		if lang == "" {
+			lang = viper.GetString("language")
+		}
+
+		client := api.NewClient(token, lang)
 		result, err := client.GetCollection(id)
 		if err != nil {
 			fmt.Println("Error fetching collection:", err)

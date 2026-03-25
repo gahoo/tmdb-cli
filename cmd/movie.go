@@ -27,7 +27,12 @@ var movieCmd = &cobra.Command{
 			return
 		}
 
-		client := api.NewClient(token)
+		lang := outputLanguage
+		if lang == "" {
+			lang = viper.GetString("language")
+		}
+
+		client := api.NewClient(token, lang)
 		result, err := client.GetMovieDetails(id)
 		if err != nil {
 			fmt.Println("Error fetching movie:", err)

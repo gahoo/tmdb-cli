@@ -10,13 +10,15 @@ const BaseURL = "https://api.themoviedb.org/3"
 
 type Client struct {
 	Token      string
+	Language   string
 	HTTPClient *http.Client
 }
 
 // NewClient creates a new TMDB API client instance with the given token
-func NewClient(token string) *Client {
+func NewClient(token string, language string) *Client {
 	return &Client{
-		Token: token,
+		Token:    token,
+		Language: language,
 		HTTPClient: &http.Client{
 			Timeout: 15 * time.Second,
 		},
@@ -31,11 +33,15 @@ func (c *Client) newRequest(method, endpoint string) (*http.Request, error) {
 		return nil, err
 	}
 	
+	q := req.URL.Query()
+	if c.Language != "" {
+		q.Add("language", c.Language)
+	}
+	req.URL.RawQuery = q.Encode()
+
 	req.Header.Add("accept", "application/json")
 	
 	if c.Token != "" {
-		// Suppress Bearer prefix logic for v3 keys vs v4 token if needed, 
-		// but standard TMDB API uses Bearer for API Read Access Tokens string.
 		req.Header.Add("Authorization", "Bearer "+c.Token)
 	}
 	

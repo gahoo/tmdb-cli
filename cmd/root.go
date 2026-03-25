@@ -12,6 +12,7 @@ var (
 	downloadPoster bool
 	outputFile     string
 	outputFields   string
+	outputLanguage string
 )
 
 var rootCmd = &cobra.Command{
@@ -35,6 +36,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVar(&downloadPoster, "poster", false, "Download the poster image locally when output format is NFO")
 	rootCmd.PersistentFlags().StringVarP(&outputFile, "output", "o", "", "Export JSON output to the specified file")
 	rootCmd.PersistentFlags().StringVarP(&outputFields, "fields", "f", "", "Comma-separated list of fields to exact (e.g. title,overview,budget)")
+	rootCmd.PersistentFlags().StringVarP(&outputLanguage, "language", "l", "", "Language for TMDB API results (e.g. zh-CN, en-US)")
 }
 
 func initConfig() {

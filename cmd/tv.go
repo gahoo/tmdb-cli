@@ -29,7 +29,12 @@ var tvCmd = &cobra.Command{
 			return
 		}
 
-		client := api.NewClient(token)
+		lang := outputLanguage
+		if lang == "" {
+			lang = viper.GetString("language")
+		}
+
+		client := api.NewClient(token, lang)
 
 		if seasonNum > 0 {
 			result, err := client.GetTVSeasonDetails(id, seasonNum)
@@ -91,7 +96,12 @@ var episodeCmd = &cobra.Command{
 			return
 		}
 
-		client := api.NewClient(token)
+		lang := outputLanguage
+		if lang == "" {
+			lang = viper.GetString("language")
+		}
+
+		client := api.NewClient(token, lang)
 		result, err := client.GetTVEpisode(tvID, seasonNum, epNum)
 		if err != nil {
 			fmt.Println("Error fetching TV episode:", err)

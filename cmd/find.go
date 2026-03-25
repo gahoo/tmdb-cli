@@ -28,7 +28,12 @@ var findCmd = &cobra.Command{
 			return
 		}
 
-		client := api.NewClient(token)
+		lang := outputLanguage
+		if lang == "" {
+			lang = viper.GetString("language")
+		}
+
+		client := api.NewClient(token, lang)
 		result, err := client.FindByExternalID(externalID, externalSource)
 		if err != nil {
 			fmt.Println("Error finding item:", err)

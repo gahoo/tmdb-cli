@@ -22,7 +22,12 @@ var trendingCmd = &cobra.Command{
 			return
 		}
 
-		client := api.NewClient(token)
+		lang := outputLanguage
+		if lang == "" {
+			lang = viper.GetString("language")
+		}
+
+		client := api.NewClient(token, lang)
 		result, err := client.GetTrending(trendingType, trendingTime)
 		if err != nil {
 			fmt.Println("Error fetching trending:", err)

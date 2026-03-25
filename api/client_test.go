@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewClient(t *testing.T) {
-	client := NewClient("dummy_token")
+	client := NewClient("dummy_token", "")
 	if client.Token != "dummy_token" {
 		t.Errorf("Expected token to be dummy_token, got %s", client.Token)
 	}
@@ -15,7 +15,7 @@ func TestNewClient(t *testing.T) {
 }
 
 func TestNewRequest(t *testing.T) {
-	client := NewClient("dummy_token")
+	client := NewClient("dummy_token", "")
 	req, err := client.newRequest("GET", "/test")
 	if err != nil {
 		t.Errorf("did not expect error, got %v", err)
